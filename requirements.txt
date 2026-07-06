@@ -1,0 +1,32 @@
+# Thesis dependencies — pinned (Week 1).
+# Python 3.9 on the data-prep machine; use 3.10+ on the GPU machine for torch.
+#
+# Split into two groups:
+#   (A) data-prep / analysis — needed everywhere, already verified on this machine.
+#   (B) training / inference — needed only on the GPU machine (installed by
+#       code_and_models/setup_environment.sh). torch is intentionally NOT pinned
+#       here because the right build depends on your CUDA version.
+
+# ---- (A) data-prep & analysis (verified versions) ----
+pandas==2.2.3
+pyarrow==21.0.0
+numpy==2.0.2
+scikit-learn==1.5.2
+scipy==1.13.1
+transformers==4.52.4          # tokenizer-only use here (ModernBERT 8192 filter)
+tokenizers==0.21.2
+huggingface_hub==0.32.3
+datasets==4.5.0
+safetensors==0.5.3
+accelerate==1.8.1
+matplotlib>=3.8                # figures (Pareto plot, learning curves)
+pytest>=8.0                    # unit tests
+
+# ---- (B) GPU machine only — install on top of a CUDA-matched torch ----
+# Install torch first, matching your CUDA, e.g.:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# torch>=2.3
+# lettucedetect>=0.2.0          # or: pip install -e ./code_and_models/LettuceDetect
+# peft>=0.11                    # LoRA few-shot adaptation (Week 5)
+# evaluate>=0.4
+# sentencepiece>=0.2            # DeBERTa-v3 NLI tokenizer (Week 4)

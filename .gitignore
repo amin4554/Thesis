@@ -1,0 +1,54 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Outputs (regenerable from code) ---
+output/
+*.sqlite
+
+# --- Large data: fetched via datasets/get_datasets.py + setup_environment.sh
+#     or attached as a Kaggle Dataset. Never committed. ---
+code_and_models/RAGTruth/dataset/
+code_and_models/TriviaPlus/
+code_and_models/FaithBench/
+code_and_models/LettuceDetect/
+code_and_models/faithjudge/
+code_and_models/hallucination-benchmark-trivialplus/
+code_and_models/ModernBERT/
+datasets/samples/
+datasets/_triviaplus_tmp/
+*.parquet
+*.jsonl
+
+# --- Model weights / checkpoints ---
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+*.onnx
+hf_cache/
+.cache/
+
+# --- Papers (copyright) and binary thesis docs ---
+docs/*.pdf
+*.docx
+*.pptx
+~$*
+
+# --- Assistant / IDE tooling state: must NEVER be committed (see README) ---
+.claude/
+**/.claude/
+CLAUDE.md
+.mcp.json
+.cursor/
+.vscode/
+.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
