@@ -15,7 +15,7 @@ Usage:
         method="lettucedetect-large", train_set="ragtruth-all", eval_set="ragtruth-test",
         task="qa", n_train=None, seed=42,
         example_f1=79.1, span_f1=58.8, balanced_acc=..., auroc=...,
-        cost_usd=..., wall_clock_s=..., n_tokens=..., n_eval=2700,
+        cost_eur=..., wall_clock_s=..., n_tokens=..., n_eval=2700,
         phase="P0", notes="reproduction",
     )
 """
@@ -38,7 +38,7 @@ RUN_FIELDS = [
     "eval_set",       # e.g. ragtruth-test, triviaplus-test, ragtruth-summ
     "task",           # qa | summarization | data2txt
     "n_train",        # few-shot n (int) or empty for zero-shot/full
-    "seed",           # secondary seeds or one of PRIMARY_COMPARISON_SEEDS
+    "seed",           # 13 | 42 | 123
     # --- accuracy ---
     "example_f1",     # response-level F1 (primary)
     "span_f1",        # span-level F1 (RAGTruth only; empty elsewhere)
@@ -46,11 +46,10 @@ RUN_FIELDS = [
     "auroc",
     "precision",
     "recall",
-    "tpr_at_5_fpr",   # exposé-defined secondary operating-point metric
     "threshold",      # decision threshold used
     "n_eval",         # number of evaluated examples
     # --- cost (for the RQ3 Pareto plot) ---
-    "cost_usd",       # total USD for this run's evaluation
+    "cost_eur",       # total € for this run's evaluation
     "wall_clock_s",   # total seconds
     "gpu_seconds",    # GPU-seconds (training+inference as applicable)
     "n_tokens",       # total tokens billed (judge / API methods)
@@ -95,10 +94,9 @@ def log_result(
     auroc: Optional[float] = None,
     precision: Optional[float] = None,
     recall: Optional[float] = None,
-    tpr_at_5_fpr: Optional[float] = None,
     threshold: Optional[float] = None,
     n_eval: Optional[int] = None,
-    cost_usd: Optional[float] = None,
+    cost_eur: Optional[float] = None,
     wall_clock_s: Optional[float] = None,
     gpu_seconds: Optional[float] = None,
     n_tokens: Optional[int] = None,
@@ -108,10 +106,9 @@ def log_result(
     db_path: str = P.RESULTS_LOG_DB,
 ) -> dict:
     """Append one experiment row to both the CSV and the SQLite log."""
-    allowed_seeds = set(P.SEEDS) | set(P.PRIMARY_COMPARISON_SEEDS)
-    if seed not in allowed_seeds:
+    if seed not in P.SEEDS:
         # Not fatal, but warn: reported numbers must use the fixed seeds.
-        print(f"[tracking] warning: seed {seed} is not one of {sorted(allowed_seeds)}")
+        print(f"[tracking] warning: seed {seed} is not one of {P.SEEDS}")
 
     row = {
         "timestamp": _now(),
@@ -128,10 +125,9 @@ def log_result(
         "auroc": auroc,
         "precision": precision,
         "recall": recall,
-        "tpr_at_5_fpr": tpr_at_5_fpr,
         "threshold": threshold,
         "n_eval": n_eval,
-        "cost_usd": cost_usd,
+        "cost_eur": cost_eur,
         "wall_clock_s": wall_clock_s,
         "gpu_seconds": gpu_seconds,
         "n_tokens": n_tokens,

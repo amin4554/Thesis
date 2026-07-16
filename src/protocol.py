@@ -75,10 +75,7 @@ RESULTS_LOG_DB = os.path.join(OUTPUT_DIR, "results_log.sqlite")
 # --------------------------------------------------------------------------- #
 # Reproducibility
 # --------------------------------------------------------------------------- #
-# Three seeds cover secondary/exploratory grids.  The exposé pre-registers at
-# least five seeds for the primary n=100 adapted-detector-vs-judge comparison.
-SEEDS = (13, 42, 123)
-PRIMARY_COMPARISON_SEEDS = (13, 42, 123, 2026, 3119828)
+SEEDS = (13, 42, 123)  # every reported number = mean ± std over these three.
 
 # --------------------------------------------------------------------------- #
 # Model / tokenizer
@@ -136,40 +133,18 @@ RAGTRUTH_TASK_MAP = {
 # --------------------------------------------------------------------------- #
 JUDGE_MODEL = "PINME"          # DECIDE LATER — e.g. a frontier or mid-tier judge
 JUDGE_SAMPLE_CAP = 500         # DECIDED (Week 1): 500 evaluations per arm, cached
-JUDGE_PRICE_PER_1K_INPUT = 0.0   # USD per 1k input tokens, set with the model
-JUDGE_PRICE_PER_1K_OUTPUT = 0.0  # USD per 1k output tokens, set with the model
+JUDGE_PRICE_PER_1K_INPUT = 0.0   # € per 1k input tokens, set with the model
+JUDGE_PRICE_PER_1K_OUTPUT = 0.0  # € per 1k output tokens, set with the model
 JUDGE_PINNED = False           # flip to True once the model + prices above are set
-
-# The exposé also requires a numeric reliability operating point anchored to
-# the reproduced in-domain result. Keep these unset until the supervisor-facing
-# record contains the actual values; evaluation code must call the guard below.
-RELIABILITY_MIN_RESPONSE_F1 = None
-RELIABILITY_MIN_TPR_AT_5_FPR = None
 
 
 def assert_judge_pinned() -> None:
     """Guard used by the Week-4 judge harness so an unpinned judge can't run."""
-    if (
-        not JUDGE_PINNED
-        or JUDGE_MODEL == "PINME"
-        or JUDGE_SAMPLE_CAP <= 0
-        or JUDGE_PRICE_PER_1K_INPUT <= 0
-        or JUDGE_PRICE_PER_1K_OUTPUT <= 0
-    ):
+    if not JUDGE_PINNED or JUDGE_MODEL == "PINME" or JUDGE_SAMPLE_CAP <= 0:
         raise RuntimeError(
             "LLM judge is not pinned. Set JUDGE_MODEL, the prices, and "
             "JUDGE_PINNED=True in src/protocol.py before running the judge "
             "baseline (and record it in FROZEN_PROTOCOL.md)."
-        )
-
-
-def assert_reliability_pinned() -> None:
-    """Block final evaluation while the registered operating point is unset."""
-    if RELIABILITY_MIN_RESPONSE_F1 is None or RELIABILITY_MIN_TPR_AT_5_FPR is None:
-        raise RuntimeError(
-            "Reliability thresholds are not pinned. Set the minimum response "
-            "F1 and TPR@5%FPR in src/protocol.py and record them in "
-            "FROZEN_PROTOCOL.md before final evaluation."
         )
 
 

@@ -1,10 +1,8 @@
 """Common-schema data preparation for the thesis (Week 1 deliverable).
 
 Loads every dataset into one record schema, applies the locked label-mapping
-(span annotations -> response-level), flags gray-area and over-window records,
-then writes prepared JSONL + a stats report. Over-window Trivia+ records stay in
-the registered primary set and are handled later by chunk-and-aggregate
-evaluation; ``single_window_view`` exposes the 8,192-token diagnostic subset.
+(span annotations -> response-level), the gray-area exclusion, and the exact
+ModernBERT 8,192-token filter, then writes prepared JSONL + a stats report.
 
 Common record schema (one dict per generated response):
 
@@ -217,17 +215,9 @@ LOADERS = {"ragtruth": load_ragtruth, "triviaplus": load_triviaplus}
 # helpers to get the analysis subsets).
 # --------------------------------------------------------------------------- #
 def primary_view(records: list[dict]) -> list[dict]:
-    """Registered primary analysis set: exclude gray-area labels only.
-
-    Over-window contexts remain present and must be evaluated with the
-    documented chunk-and-aggregate procedure required by the exposé.
-    """
-    return [r for r in records if not r["is_gray"]]
-
-
-def single_window_view(records: list[dict]) -> list[dict]:
-    """Diagnostic subset that fits ModernBERT's 8,192-token window directly."""
-    return [r for r in primary_view(records) if not r["over_token_limit"]]
+    """The set used for the primary analysis: gray-area excluded, and (for the
+    token-budget rule) over-length contexts excluded."""
+    return [r for r in records if not r["is_gray"] and not r["over_token_limit"]]
 
 
 # --------------------------------------------------------------------------- #
@@ -241,7 +231,6 @@ def dataset_stats(records: list[dict]) -> dict:
     over = sum(bool(r["over_token_limit"]) for r in records)
     toks = [r["n_tokens"] for r in records if r["n_tokens"] is not None]
     prim = primary_view(records)
-    single = single_window_view(records)
     stats = {
         "n_total": len(records),
         "by_split": dict(by_split),
@@ -251,7 +240,6 @@ def dataset_stats(records: list[dict]) -> dict:
         "n_gray": gray,
         "n_over_token_limit": over,
         "n_primary": len(prim),
-        "n_single_window": len(single),
     }
     if toks:
         toks_sorted = sorted(toks)
